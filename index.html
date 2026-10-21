@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>東京賞楓旅行手冊 🍁</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #5B8A88;
+      --primary-light: #8FAEA9;
+      --primary-bg: #F4F8F7;
+      --card-bg: #FFFFFF;
+      --accent: #D76B5A; /* 秋季楓葉紅點綴 */
+      --text: #2C3E3D;
+      --text-muted: #6C7D7B;
+      --border: #DFEBE9;
+      --tag-bg: #E7EFEF;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Microsoft JhengHei", "微軟正黑體", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--primary-bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: #FAFCFB;
+      box-shadow: 0 0 20px rgba(91, 138, 136, 0.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 75px;
+    }
+
+    /* 頂部手冊風格 Header */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: 24px 20px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 3px 10px rgba(91, 138, 136, 0.2);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .trip-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .trip-date {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .admin-badge {
+      background: rgba(255, 255, 255, 0.25);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* 內容容器 */
+    main {
+      padding: 16px;
+      flex: 1;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 卡片設計 */
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 8px;
+    }
+
+    /* 日程列表樣式 */
+    .day-selector {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .day-selector::-webkit-scrollbar { display: none; }
+
+    .day-chip {
+      flex: 0 0 auto;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: var(--tag-bg);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .day-chip.active {
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 26px;
+      margin-bottom: 18px;
+      border-left: 2px dashed var(--primary-light);
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 3px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .time-badge {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .transport-tag {
+      background: var(--tag-bg);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    .item-desc {
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .item-notes {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* 行李清單 */
+    .pack-category {
+      font-weight: bold;
+      color: var(--primary);
+      margin: 16px 0 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .pack-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .pack-item input {
+      margin-right: 12px;
+      accent-color: var(--primary);
+      transform: scale(1.2);
+    }
+    .pack-item.checked {
+      text-decoration: line-through;
+      color: var(--text-muted);
+      background: #F8FBFB;
+    }
+
+    /* 景點整理卡片 */
+    .filter-tags {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .filter-btn {
+      padding: 4px 12px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .spot-card {
+      background: white;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+    }
+    .spot-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .spot-tag-group {
+      display: flex;
+      gap: 4px;
+      margin: 6px 0;
+    }
+    .spot-tag {
+      font-size: 0.7rem;
+      background: var(--tag-bg);
+      color: var(--primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .maps-btn {
+      color: #EA4335;
+      text-decoration: none;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 費用表單 */
+    .expense-total {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .expense-total span {
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    .expense-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* 底部導覽列 */
+    nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 10px;
+      z-index: 100;
+    }
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 0.75rem;
+      gap: 4px;
+      cursor: pointer;
+      width: 20%;
+    }
+    .nav-btn.active {
+      color: var(--primary);
+      font-weight: bold;
+    }
+    .nav-btn i {
+      font-size: 1.15rem;
+    }
+
+    /* 燈箱放大功能 */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+    }
+    .lightbox img {
+      max-width: 95%;
+      max-height: 90vh;
+      border-radius: 6px;
+      transition: transform 0.2s;
+    }
+
+    /* 管理員專用控制樣式 */
+    .admin-only {
+      display: none;
+    }
+    body.is-admin .admin-only {
+      display: inline-block;
+    }
+    .action-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <!-- 頂部手冊 -->
+  <header>
+    <div class="header-top">
+      <div>
+        <div class="trip-title">🍁 東京・河口湖賞楓手冊</div>
+        <div class="trip-date">11/21 - 11/29・9天8夜</div>
+      </div>
+      <div class="admin-badge" onclick="toggleAdmin()">
+        <i class="fa-solid fa-lock" id="lock-icon"></i>
+        <span id="admin-status">訪客檢視</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要分頁 -->
+  <main>
+    <!-- 分頁 1: 每日行程 -->
+    <section id="tab-schedule" class="tab-content active">
+      <div class="day-selector" id="day-selector">
+        <!-- 動態產生 Day 1 ~ 9 -->
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <span id="current-day-label">第 1 天 (11/21)</span>
+          <button class="action-btn admin-only" style="padding: 3px 8px; font-size: 0.75rem;" onclick="addScheduleItem()">+ 新增項目</button>
+        </div>
+        <div id="timeline-list">
+          <!-- 項目清單 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 分頁 2: 地鐵路線 -->
+    <section id="tab-metro" class="tab-content">
+      <div class="card">
+        <div class="card-title">東京地鐵 & 交通路線圖</div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">點選下方圖片即可全螢幕放大查看：</p>
+        <div id="map-preview" style="text-align: center;">
+          <img id="metro-img" src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=600&auto=format&fit=crop" 
+               style="width: 100%; border-radius: 8px; cursor: zoom-in;" onclick="openLightbox(this.src)" alt="地鐵圖">
+        </div>
+        <div class="admin-only" style="margin-top: 14px;">
+          <label style="font-size: 0.8rem; color: var(--text-muted);">上傳自訂地圖圖片：</label>
+          <input type="file" accept="image/*" onchange="uploadMapImage(event)" style="font-size: 0.8rem; margin-top: 4px;">
+        </div>
+      </div>
+    </section>
+
+    <!-- 分頁 3: 收藏景點 -->
+    <section id="tab-spots" class="tab-content">
+      <div class="filter-tags">
+        <button class="filter-btn active" onclick="filterSpots('全部')">全部</button>
+        <button class="filter-btn" onclick="filterSpots('景點')">景點</button>
+        <button class="filter-btn" onclick="filterSpots('餐廳')">餐廳</button>
+        <button class="filter-btn" onclick="filterSpots('逛街')">逛街</button>
+        <button class="filter-btn" onclick="filterSpots('素食')">素食</button>
+        <button class="filter-btn" onclick="filterSpots('點心')">點心</button>
+      </div>
+      <div id="spot-list">
+        <!-- 景點資料 -->
+      </div>
+    </section>
+
+    <!-- 分頁 4: 行李打包 (旅伴獨立儲存) -->
+    <section id="tab-pack" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <span>個人行李打包清單</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">各手機各自紀錄</span>
+        </div>
+        
+        <div class="pack-category">🎒 隨身行李 (Carry-on)</div>
+        <div id="carry-on-list"></div>
+
+        <div class="pack-category">🧳 托運行李箱 (Luggage)</div>
+        <div id="luggage-list"></div>
+      </div>
+    </section>
+
+    <!-- 分頁 5: 目前花費 -->
+    <section id="tab-expense" class="tab-content">
+      <div class="expense-total">
+        <div style="font-size: 0.8rem; opacity: 0.9;">總累計支出 (JPY)</div>
+        <span id="expense-total-amount">¥ 0</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>花費明細記錄</span>
+          <button class="action-btn admin-only" style="padding: 3px 8px; font-size: 0.75rem;" onclick="addExpense()">+ 記一筆</button>
+        </div>
+        <div id="expense-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部導覽列 -->
+  <nav>
+    <button class="nav-btn active" onclick="switchTab('schedule', this)">
+      <i class="fa-solid fa-calendar-days"></i>
+      <span>行程</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('metro', this)">
+      <i class="fa-solid fa-map"></i>
+      <span>地鐵</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('spots', this)">
+      <i class="fa-solid fa-bookmark"></i>
+      <span>景點</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('pack', this)">
+      <i class="fa-solid fa-clipboard-check"></i>
+      <span>行李</span>
+    </button>
+    <button class="nav-btn" onclick="switchTab('expense', this)">
+      <i class="fa-solid fa-yen-sign"></i>
+      <span>花費</span>
+    </button>
+  </nav>
+</div>
+
+<!-- 圖片放大燈箱 -->
+<div id="lightbox" class="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="放大圖">
+</div>
+
+<script>
+  /* ---------------- 管理員密碼模式 ---------------- */
+  let isAdmin = false;
+  const ADMIN_PASS = "1121"; // 您可以自行修改此管理員密碼
+
+  function toggleAdmin() {
+    if (!isAdmin) {
+      const pass = prompt("請輸入管理員解鎖密碼：");
+      if (pass === ADMIN_PASS) {
+        isAdmin = true;
+        document.body.classList.add("is-admin");
+        document.getElementById("admin-status").innerText = "管理模式";
+        document.getElementById("lock-icon").className = "fa-solid fa-lock-open";
+        alert("已切換為管理員模式！您可以新增與編輯行程內容。");
+      } else if (pass !== null) {
+        alert("密碼不正確！");
+      }
+    } else {
+      isAdmin = false;
+      document.body.classList.remove("is-admin");
+      document.getElementById("admin-status").innerText = "訪客檢視";
+      document.getElementById("lock-icon").className = "fa-solid fa-lock";
+      alert("已切換回訪客檢視模式。");
+    }
+  }
+
+  /* ---------------- 分頁導覽 ---------------- */
+  function switchTab(tabId, el) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+    el.classList.add('active');
+  }
+
+  /* ---------------- 每日行程資料 ---------------- */
+  const scheduleData = [
+    {
+      day: 1, date: "11/21 (五)", items: [
+        { dep: "15:00", arr: "16:30", transport: "✈️ 飛機", desc: "抵達成田國際機場，出關與領取網卡", notes: "辦理入境手續" },
+        { dep: "17:00", arr: "18:20", transport: "🚆 Skyliner/N'EX", desc: "前往新宿飯店 Check-in", notes: "今晚夜宿新宿" },
+        { dep: "19:00", arr: "21:30", transport: "🚶 步行", desc: "新宿街頭、思出橫丁散策 & 晚餐", notes: "感受東京夜生活" }
+      ]
+    },
+    {
+      day: 2, date: "11/22 (六)", items: [
+        { dep: "08:30", arr: "10:30", transport: "🚌 高速巴士 / JR", desc: "新宿出發前往河口湖", notes: "抵達河口湖車站" },
+        { dep: "11:00", arr: "11:30", transport: "🛵 租車", desc: "辦理租借摩托車手續", notes: "攜帶台灣駕照＋日文譯本" },
+        { dep: "13:00", arr: "16:30", transport: "🛵 騎車", desc: "河口湖賞楓走廊（紅葉迴廊）", notes: "楓葉盛開，騎車穿梭極為便利" }
+      ]
+    },
+    {
+      day: 3, date: "11/23 (日)", items: [
+        { dep: "09:00", arr: "12:00", transport: "🛵 騎車", desc: "新倉山淺間公園（五重塔＋富士山）", notes: "階梯較多，需穿好走的鞋" },
+        { dep: "13:30", arr: "16:30", transport: "🛵 騎車", desc: "西湖療癒之里根場、大石公園巡禮", notes: "沿湖欣賞富士山景" }
+      ]
+    },
+    {
+      day: 4, date: "11/24 (一)", items: [
+        { dep: "10:00", arr: "12:00", transport: "🛵 騎車", desc: "忍野八海散策品嚐泉水豆乳", notes: "下午歸還租借摩托車" },
+        { dep: "14:00", arr: "16:30", transport: "🚆 特急富士回遊", desc: "啟程前往東京上野 Check-in", notes: "後續天數住宿於上野" }
+      ]
+    },
+    {
+      day: 5, date: "11/25 (二)", items: [
+        { dep: "08:00", arr: "09:30", transport: "🚆 京王線", desc: "前往高尾山賞楓半日遊", notes: "搭乘登山纜車 / 吊椅賞秋楓" },
+        { dep: "14:30", arr: "17:00", transport: "🚆 京王線", desc: "返回東京市區／上野公園散步", notes: "享用高尾山藥王院名物山藥蕎麥麵" }
+      ]
+    },
+    {
+      day: 6, date: "11/26 (三)", items: [
+        { dep: "09:30", arr: "12:00", transport: "🚇 地鐵", desc: "明治神宮外苑銀杏大道 & 表參道", notes: "金黃銀杏林拍照" },
+        { dep: "13:30", arr: "18:00", transport: "🚇 地鐵", desc: "澀谷 Shibuya Sky、原宿商圈逛街", notes: "提前預訂觀景台門票" }
+      ]
+    },
+    {
+      day: 7, date: "11/27 (四)", items: [
+        { dep: "09:00", arr: "12:00", transport: "🚇 地鐵", desc: "淺草寺參拜、雷門仲見世通小吃", notes: "品嚐抹茶可麗餅、人形燒" },
+        { dep: "13:30", arr: "17:00", transport: "🚶 步行", desc: "晴空塔周邊逛街觀景", notes: "採買各類特色伴手禮" }
+      ]
+    },
+    {
+      day: 8, date: "11/28 (五)", items: [
+        { dep: "10:00", arr: "13:00", transport: "🚶 步行", desc: "上野阿美橫町大採購（藥妝、零食）", notes: "掃貨二木的菓子、多慶屋" },
+        { dep: "14:30", arr: "18:00", transport: "🚇 地鐵", desc: "秋葉原電器街 或 銀座下午茶", notes: "自由購物時光" }
+      ]
+    },
+    {
+      day: 9, date: "11/29 (六)", items: [
+        { dep: "10:00", arr: "11:30", transport: "🚆 京成 Skyliner", desc: "上野車站直達成田機場", notes: "行李最後整理托運" },
+        { dep: "14:00", arr: "17:00", transport: "✈️ 飛機", desc: "成田機場起飛平安返家", notes: "帶著滿滿楓葉回憶賦歸" }
+      ]
+    }
+  ];
+
+  let currentSelectedDay = 1;
+
+  function renderDaySelector() {
+    const container = document.getElementById("day-selector");
+    container.innerHTML = scheduleData.map(d => `
+      <div class="day-chip ${d.day === currentSelectedDay ? 'active' : ''}" onclick="selectDay(${d.day})">
+        Day ${d.day}
+      </div>
+    `).join("");
+  }
+
+  function selectDay(day) {
+    currentSelectedDay = day;
+    renderDaySelector();
+    renderTimeline();
+  }
+
+  function renderTimeline() {
+    const dayObj = scheduleData.find(d => d.day === currentSelectedDay);
+    document.getElementById("current-day-label").innerText = `第 ${dayObj.day} 天 (${dayObj.date})`;
+    const listEl = document.getElementById("timeline-list");
+    
+    listEl.innerHTML = dayObj.items.map((it, idx) => `
+      <div class="timeline-item">
+        <div class="time-badge">
+          <span>${it.dep} - ${it.arr}</span>
+          <span class="transport-tag">${it.transport}</span>
+          ${isAdmin ? `<button onclick="deleteScheduleItem(${idx})" style="border:none;background:none;color:#999;cursor:pointer;margin-left:auto;"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+        </div>
+        <div class="item-desc">${it.desc}</div>
+        <div class="item-notes">${it.notes}</div>
+      </div>
+    `).join("");
+  }
+
+  function addScheduleItem() {
+    const dep = prompt("請輸入出發時間（如 09:00）：", "09:00");
+    const arr = prompt("請輸入抵達時間（如 10:30）：", "10:30");
+    const transport = prompt("請輸入交通工具（如 🚆 電車、🛵 騎車）：", "🚆 電車");
+    const desc = prompt("請輸入行程描述：", "新行程地點");
+    const notes = prompt("備註說明：", "");
+    if (desc) {
+      scheduleData.find(d => d.day === currentSelectedDay).items.push({ dep, arr, transport, desc, notes });
+      renderTimeline();
+    }
+  }
+
+  function deleteScheduleItem(idx) {
+    if (confirm("確定要刪除這筆行程嗎？")) {
+      scheduleData.find(d => d.day === currentSelectedDay).items.splice(idx, 1);
+      renderTimeline();
+    }
+  }
+
+  /* ---------------- 圖片燈箱與上傳 ---------------- */
+  function openLightbox(url) {
+    const lb = document.getElementById("lightbox");
+    document.getElementById("lightbox-img").src = url;
+    lb.style.display = "flex";
+  }
+  function closeLightbox() {
+    document.getElementById("lightbox").style.display = "none";
+  }
+  function uploadMapImage(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById("metro-img").src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  /* ---------------- 收藏景點清單 ---------------- */
+  const spotsData = [
+    { name: "河口湖紅葉迴廊", cat: "景點", area: "河口湖", tag: "自然/賞楓", map: "https://maps.google.com/?q=河口湖紅葉迴廊" },
+    { name: "高尾山藥王院", cat: "景點", area: "八王子/高尾山", tag: "名勝/楓葉", map: "https://maps.google.com/?q=高尾山" },
+    { name: "ほうとう不動 河口湖名物", cat: "餐廳", area: "河口湖", tag: "鄉土餺飥麵", map: "https://maps.google.com/?q=ほうとう不動" },
+    { name: "Ain Soph. Journey 新宿店", cat: "素食", area: "新宿", tag: "純素蔬食鬆餅", map: "https://maps.google.com/?q=Ain+Soph+Journey+Shinjuku" },
+    { name: "淺草 壽々喜園 (壽喜園)", cat: "點心", area: "淺草", tag: "七級特濃抹茶冰淇淋", map: "https://maps.google.com/?q=壽喜園+淺草" },
+    { name: "二木之菓子 (阿美橫町)", cat: "逛街", area: "上野", tag: "平價批發零食", map: "https://maps.google.com/?q=二木の菓子" }
+  ];
+
+  function filterSpots(cat) {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.innerText === cat);
+    });
+    const list = document.getElementById("spot-list");
+    const filtered = (cat === '全部') ? spotsData : spotsData.filter(s => s.cat === cat);
+    list.innerHTML = filtered.map(s => `
+      <div class="spot-card">
+        <div class="spot-header">
+          <strong>${s.name}</strong>
+          <a href="${s.map}" target="_blank" class="maps-btn"><i class="fa-solid fa-location-dot"></i> Google Maps</a>
+        </div>
+        <div class="spot-tag-group">
+          <span class="spot-tag">${s.cat}</span>
+          <span class="spot-tag">${s.area}</span>
+          <span class="spot-tag">${s.tag}</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  /* ---------------- 行李清單 (每人瀏覽器本地獨立儲存) ---------------- */
+  const defaultCarryOn = ["護照正本", "日幣現金 & 信用卡", "手機 & 充電器", "行動電源 (需隨身攜帶)", "國際駕照日文譯本 & 台灣駕照", "保暖防風外套 (河口湖騎車用)"];
+  const defaultLuggage = ["換洗衣物 (5~7套)", "發熱衣 & 圍巾手套", "球鞋 / 好走運動鞋", "保養品 & 保濕乳液", "常備藥品 (止痛、胃腸藥)", "萬用轉接頭", "折疊行李袋 (裝戰利品)"];
+
+  function getLocalPackingState() {
+    return JSON.parse(localStorage.getItem("packing_status") || "{}");
+  }
+
+  function togglePackingItem(itemKey) {
+    const state = getLocalPackingState();
+    state[itemKey] = !state[itemKey];
+    localStorage.setItem("packing_status", JSON.stringify(state));
+    renderPackingList();
+  }
+
+  function renderPackingList() {
+    const state = getLocalPackingState();
+    const renderGroup = (items, prefix, elId) => {
+      document.getElementById(elId).innerHTML = items.map(text => {
+        const key = prefix + "_" + text;
+        const checked = !!state[key];
+        return `
+          <div class="pack-item ${checked ? 'checked' : ''}" onclick="togglePackingItem('${key}')">
+            <input type="checkbox" ${checked ? 'checked' : ''} onclick="event.stopPropagation(); togglePackingItem('${key}')">
+            <span>${text}</span>
+          </div>
+        `;
+      }).join("");
+    };
+    renderGroup(defaultCarryOn, "c", "carry-on-list");
+    renderGroup(defaultLuggage, "l", "luggage-list");
+  }
+
+  /* ---------------- 花費記帳 ---------------- */
+  let expenses = [
+    { cat: "交通費用", desc: "成田特快 & Skyliner 乘車券", amount: 2570 },
+    { cat: "交通費用", desc: "河口湖租摩托車費用", amount: 6500 },
+    { cat: "三餐費用", desc: "河口湖不動餺飥麵午餐", amount: 1400 }
+  ];
+
+  function renderExpenses() {
+    const list = document.getElementById("expense-list");
+    let total = 0;
+    list.innerHTML = expenses.map((ex, idx) => {
+      total += ex.amount;
+      return `
+        <div class="expense-item">
+          <div>
+            <div style="font-weight: 500;">${ex.desc}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${ex.cat}</div>
+          </div>
+          <div style="font-weight: bold; color: var(--primary);">
+            ¥ ${ex.amount.toLocaleString()}
+            ${isAdmin ? `<button onclick="deleteExpense(${idx})" style="border:none;background:none;color:#999;margin-left:8px;cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join("");
+    document.getElementById("expense-total-amount").innerText = "¥ " + total.toLocaleString();
+  }
+
+  function addExpense() {
+    const cat = prompt("請選擇類別 (交通費用 / 三餐費用 / 零食費用 / 景品費用 / 小禮物費用 / 雜項)：", "三餐費用");
+    const desc = prompt("請輸入項目名稱：", "點心美食");
+    const amountStr = prompt("請輸入金額 (JPY)：", "1000");
+    const amount = parseInt(amountStr, 10);
+    if (desc && !isNaN(amount)) {
+      expenses.push({ cat, desc, amount });
+      renderExpenses();
+    }
+  }
+
+  function deleteExpense(idx) {
+    if (confirm("確認刪除此花費記錄？")) {
+      expenses.splice(idx, 1);
+      renderExpenses();
+    }
+  }
+
+  // 初始化執行
+  renderDaySelector();
+  renderTimeline();
+  filterSpots('全部');
+  renderPackingList();
+  renderExpenses();
+</script>
+</body>
+</html>
